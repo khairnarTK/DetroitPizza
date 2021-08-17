@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using DetroitPizza.Models;
 
-namespace DetroitPizza.Models
+namespace DetroitPizza
 {
 	public class Tag : BaseEntity
 	{
