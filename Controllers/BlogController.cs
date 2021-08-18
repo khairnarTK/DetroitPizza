@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System;
 
 namespace DetroitPizza.Controllers
 {
@@ -19,6 +20,7 @@ namespace DetroitPizza.Controllers
 	  [HttpPost]
 	   public async Task<IActionResult> Create(BlogPost post)
 	   {
+		 post.PublishedUtc = DateTime.UtcNow;
 		 await _db.AddAsync(post);
 		 await _db.SaveChangesAsync();
 		 return CreatedAtAction(nameof(Create), new {id = post.Id},post);
@@ -48,6 +50,39 @@ namespace DetroitPizza.Controllers
 		   }).FirstOrDefaultAsync();
 
 		   return Ok(post);
+	   }
+	
+	   [HttpPut("{id}")]
+	   public async Task<ActionResult<BlogPost>> Update(int id, BlogPost post)
+	   {
+		if(id != post.Id)
+		   	return BadRequest();
+
+		var blogPost = await _db.Posts.FindAsync(id);	
+		if (blogPost is null)
+			return NotFound();
+
+		blogPost.Title = post.Title;
+		blogPost.Content = post.Content;
+		blogPost.PublishedUtc = DateTime.UtcNow;
+		blogPost.Tags = post.Tags;
+		_db.Update(blogPost);
+		await _db.SaveChangesAsync();
+		return NoContent();
+	   }
+           
+
+	   [HttpDelete("{id}")]
+	   public async Task<ActionResult<BlogPost>> Delete(int id)
+	   {
+		   var post = await _db.Posts.FindAsync(id);
+		   if(post is null)
+		   	return NotFound();
+
+		   _db.Remove(post);
+		   await _db.SaveChangesAsync();
+		   return post; 
+
 	   }
 	}
 }
